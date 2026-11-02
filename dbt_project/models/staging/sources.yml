@@ -1,0 +1,14 @@
+# SOURCES: the raw tables in warehouse.duckdb, attached as the database "raw".
+version: 2
+sources:
+  - name: raw
+    database: raw
+    schema: main
+    description: Raw tables landed from the ordering app. Not cleaned, not documented.
+    tables:
+      - name: orders
+      - name: order_taxes
+      - name: refunds
+      - name: restaurants
+      - name: cities
+      - name: customers

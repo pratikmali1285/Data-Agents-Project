@@ -1,0 +1,4 @@
+# Only for Part 3 (the fix): the dbt project and its semantic layer
+dbt-core>=1.11,<1.13
+dbt-duckdb>=1.9
+dbt-metricflow

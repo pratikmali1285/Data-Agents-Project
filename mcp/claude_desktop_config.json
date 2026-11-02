@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "food-delivery-warehouse": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-motherduck",
+        "--db-path",
+        "/ABSOLUTE/PATH/TO/data-agent-demo/warehouse.duckdb"
+      ]
+    }
+  }
+}

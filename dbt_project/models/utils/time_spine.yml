@@ -1,0 +1,10 @@
+# MetricFlow needs a calendar table to group metrics by day, week or month.
+version: 2
+models:
+  - name: metricflow_time_spine
+    description: One row per day. MetricFlow needs this to group metrics by day, week and month.
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day

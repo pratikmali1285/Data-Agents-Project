@@ -1,0 +1,83 @@
+# THE SEMANTIC LAYER (MetricFlow).
+# Each metric is defined once, here, for everyone: dashboards, analysts and agents.
+# Try it:  mf query --metrics revenue --group-by metric_time__month
+version: 2
+semantic_models:
+  - name: orders
+    description: Orders placed on the app, one row per order.
+    model: ref('fct_orders')
+    defaults:
+      agg_time_dimension: order_date
+    entities:
+      - name: order
+        type: primary
+        expr: order_id
+      - name: restaurant
+        type: foreign
+        expr: restaurant_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: city_name
+        type: categorical
+      - name: status
+        type: categorical
+    measures:
+      - name: orders_placed
+        description: Every order placed, whatever its status.
+        agg: count
+        expr: order_id
+      - name: delivered_orders
+        agg: sum
+        expr: "case when is_delivered then 1 else 0 end"
+      - name: cancelled_orders
+        agg: sum
+        expr: "case when status = 'cancelled' then 1 else 0 end"
+      - name: net_revenue
+        description: Delivered (not refunded) orders only, after promo discount, without GST.
+        agg: sum
+        expr: net_revenue
+
+metrics:
+  - name: revenue
+    label: Revenue
+    description: >
+      Official company revenue. Delivered (not refunded) orders only, after promo discount, without GST.
+      Never use SUM(amount) from the raw orders table.
+    type: simple
+    type_params:
+      measure: net_revenue
+  - name: orders
+    label: Orders placed
+    description: Count of all orders placed, including cancelled and refunded.
+    type: simple
+    type_params:
+      measure: orders_placed
+  - name: delivered_orders
+    label: Delivered orders
+    type: simple
+    type_params:
+      measure: delivered_orders
+  - name: cancellation_rate
+    label: Cancellation rate
+    type: ratio
+    type_params:
+      numerator: cancelled_orders
+      denominator: orders
+  - name: cancelled_orders
+    label: Cancelled orders
+    type: simple
+    type_params:
+      measure: cancelled_orders
+  - name: average_order_value
+    label: Average order value
+    description: Revenue per delivered order.
+    type: ratio
+    type_params:
+      numerator: revenue
+      denominator: delivered_orders

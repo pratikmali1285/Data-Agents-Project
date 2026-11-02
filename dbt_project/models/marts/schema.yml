@@ -1,0 +1,44 @@
+# DOCS AND TESTS for fct_orders.
+# The descriptions are what the agent reads in --context mode, so write them for a newcomer.
+# The data_tests run with `dbt build` and fail if the data breaks these rules.
+version: 2
+models:
+  - name: fct_orders
+    description: >
+      One row per order placed on the app. Use this table for any question about
+      orders or revenue. City comes from the restaurant's city.
+    columns:
+      - name: order_id
+        description: Unique id of the order.
+        data_tests: [unique, not_null]
+      - name: order_date
+        description: Date the order was placed (IST).
+      - name: city_name
+        description: City of the restaurant that received the order.
+      - name: status
+        description: >
+          delivered, cancelled or refunded. In the raw orders table a refunded order still
+          says 'delivered'; here it is 'refunded'. Cancelled and refunded orders still carry
+          a checkout value but are NOT revenue.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['delivered', 'cancelled', 'refunded']
+      - name: is_delivered
+        description: True only when the order was delivered and not refunded.
+      - name: checkout_value_incl_gst
+        description: Item value plus GST, before the promo discount (raw column amount). This is NOT revenue.
+      - name: promo_discount
+        description: Promo code discount given to the customer, in rupees (raw column promo_value).
+      - name: gst
+        description: GST collected on the order (5%), from raw order_taxes. GST goes to the government, so it is not revenue.
+      - name: refund_amount
+        description: Amount refunded to the customer, from raw refunds. Null when there was no refund.
+      - name: net_revenue
+        description: >
+          Company revenue for this order: checkout value minus promo discount minus GST,
+          for delivered orders only. 0 for cancelled and refunded orders.
+          Revenue for any period = SUM(net_revenue).
+        data_tests: [not_null]
+      - name: cancel_reason
+        description: Why a cancelled order was cancelled, for example heavy_rain_no_rider.

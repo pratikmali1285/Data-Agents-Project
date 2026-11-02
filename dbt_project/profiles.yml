@@ -1,0 +1,14 @@
+# HOW DBT CONNECTS: it writes its models into analytics.duckdb and reads the raw
+# tables from ../warehouse.duckdb, attached read-only as "raw".
+# Run dbt from inside this folder:  dbt build --profiles-dir .
+food_delivery:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: analytics.duckdb          # the data team's modelled layer
+      attach:
+        - path: ../warehouse.duckdb   # the raw warehouse, attached read-only as "raw"
+          alias: raw
+          read_only: true
+      threads: 4
