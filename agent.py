@@ -55,6 +55,12 @@ else:
     # Only the raw tables, exactly as they came from the app. No documentation at all.
     db = duckdb.connect(f"{FOLDER}/warehouse.duckdb", read_only=True)
 
+# The LLM writes the SQL, so block everything outside the database files: no reading or
+# writing local files (read_csv, COPY TO), no URLs, no extension installs. Then lock the
+# settings so a query cannot switch them back on.
+db.execute("SET enable_external_access = false")
+db.execute("SET lock_configuration = true")
+
 
 def query_to_text(sql, max_rows=50):
     """Run a query and turn the result into a small text table that the LLM can read."""
